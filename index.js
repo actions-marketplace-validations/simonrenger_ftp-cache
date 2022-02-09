@@ -75,7 +75,7 @@ async function cache(host, user, password, secure, archive, archive_name, source
         const source = core.getInput('source');
         const destination = core.getInput('destination');
         const secure = core.getInput('secure') === "true";
-        const timeout = core.getInput('timeout');
+        const timeout = parseInt(core.getInput('timeout'));
         const upload = core.getInput('upload') === "true";
         const archive = core.getInput('archive') === "true";
         const archive_name = core.getInput('archive-name');

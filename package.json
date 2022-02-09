@@ -13,6 +13,7 @@
     "@actions/core": "^1.6.0",
     "@actions/github": "^5.0.0",
     "basic-ftp": "^4.6.6",
+    "ssh2-sftp-client": "^7.2.2",
     "tar": "^6.1.11"
   }
 }

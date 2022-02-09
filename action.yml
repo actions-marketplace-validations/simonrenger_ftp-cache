@@ -1,6 +1,10 @@
 name: 'FTP Cache'
 description: 'FTP Cache'
 inputs:
+  mode:
+    description: 'FTP or SFTP'
+    required: true
+    default: "FTP"
   host:
     description: 'Host'
     required: true

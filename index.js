@@ -72,11 +72,12 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
                 core.info(`upload: ${destination} <-- ${source}`);
                 await sftp.downloadDir(source, destination);
             }
-            sftp.end();
+            await sftp.end();
         }
     } catch (e) {
-        core.warning(`error: ${e.message}`);
-        sftp.end();
+        core.error(`stack: ${e.stack}`);
+        core.error(`error: ${e.message}`);
+        await sftp.end();
     }
 
 }

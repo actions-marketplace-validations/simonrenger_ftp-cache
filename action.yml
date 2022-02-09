@@ -1,0 +1,40 @@
+name: 'FTP Cache'
+description: 'FTP Cache'
+inputs:
+  host:
+    description: 'Host'
+    required: true
+  upload:
+    description: 'Upload or Download'
+    default: true
+    required: true
+  user:
+    description: 'User'
+    required: true
+  password:
+    description: 'Password'
+    required: true
+  source:
+    description: 'Source Folder'
+    required: true
+  destination:
+    description: 'Destination Folder'
+    required: true
+  secure:
+    description: 'Destination Folder'
+    required: false
+    default: true
+  timeout:
+    description: 'timeout Folder'
+    required: false
+    default: 30000
+  archive-name:
+    description: 'Cache Name. Needed if archive = true'
+    required: false
+  archive:
+    description: 'Creates a tar archive for the given folder and uploads/downloads that'
+    required: false
+    default: true
+runs:
+  using: 'node16'
+  main: 'index.js'

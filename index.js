@@ -20,9 +20,6 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
     sftp.on('download', info => {
         core.info(`Listener: Download ${info.source}`);
     });
-    sftp.on('upload', info => {
-        core.info(`Listener: Uploaded ${info.source}`);
-    });
     try {
         core.info(`Connecting`);
         await sftp.connect(config);
@@ -41,7 +38,7 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
                 await tar.c(
                     {
                         gzip: true,
-                        file: src
+                        file: tar_name
                     },
                     [src_path]
                 );
@@ -51,15 +48,18 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
                     core.info(`mkdir ${destination}`);
                     await sftp.mkdir(destination, false);
                 }
-                core.info(`upload ${src} --> ${dest}`);
-                await sftp.put(fs.createReadStream(src), dest, {
+                core.info(`upload ${tar_name} --> ${dest}`);
+                await sftp.fastPut(tar_name, dest, {
                     writeStreamOptions: {
                         flags: 'w',  // w - write and a - append
                         mode: 0o666, // mode to use for created file (rwx)
+                        step: (total_transferred, chunk, total) => {
+                            core.info(`Upload: ${total_transferred} / ${total}`);
+                        }
                     }
                 });
                 await sftp.end();
-                fs.rmSync(src);
+                fs.rmSync(tar_name);
             } else {
                 core.info(`download: ${dest} <-- ${src}`);
                 await sftp.get(src, fs.createWriteStream(dest));
@@ -83,8 +83,9 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
             await sftp.end();
         }
     } catch (e) {
-        core.error(`stack: ${e.stack}`);
         core.error(`error: ${e.message}`);
+        core.error(`path: ${e.path}`);
+        core.error(`stack: ${e.stack}`);
         core.setFailed(`error: ${e.message}`);
         await sftp.end();
     }

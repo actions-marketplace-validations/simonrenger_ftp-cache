@@ -32,6 +32,7 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
             let dest = path.posix.join(destination, tar_name);
             let src = path.posix.join(source, tar_name);
             if (upload) {
+                core.info(`tar folder ${source}`);
                 await tar.c(
                     {
                         gzip: true,
@@ -45,7 +46,7 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
                     core.info(`mkdir ${destination}`);
                     await sftp.mkdir(destination, false);
                 }
-                core.info(`upload ${src}`);
+                core.info(`upload ${src} --> ${dest}`);
                 await sftp.put(fs.createReadStream(src), dest, {
                     writeStreamOptions: {
                         flags: 'w',  // w - write and a - append
@@ -55,8 +56,10 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
                 await sftp.end();
                 fs.rmSync(src);
             } else {
+                core.info(`download: ${dest} <-- ${src}`);
                 await sftp.get(src, fs.createWriteStream(dest));
                 await sftp.end();
+                core.info(`untar ${dest}`);
                 await tar.x(
                     {
                         file: dest
@@ -69,7 +72,7 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
                 core.info(`upload: ${source} --> ${destination}`);
                 await sftp.uploadDir(source, destination);
             } else {
-                core.info(`upload: ${destination} <-- ${source}`);
+                core.info(`download: ${destination} <-- ${source}`);
                 await sftp.downloadDir(source, destination);
             }
             await sftp.end();

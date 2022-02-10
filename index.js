@@ -33,6 +33,10 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
             let src = path.posix.join(source, tar_name);
             if (upload) {
                 const src_path = source.split(path.sep).join(path.posix.sep);
+                if (!fs.existsSync(src_path)) {
+                    throw Error(`cannot find: ${src_path}`);
+                }
+                fs.accessSync(src_path, fs.constants.R_OK);
                 core.info(`tar folder ${src_path}`);
                 await tar.c(
                     {

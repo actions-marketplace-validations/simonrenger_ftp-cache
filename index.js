@@ -62,8 +62,11 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
                 fs.rmSync(tar_name);
             } else {
                 core.info(`download: ${dest} <-- ${src}`);
-                await sftp.get(src, fs.createWriteStream(dest));
+                await sftp.fastGet(src, dest);
                 await sftp.end();
+                if (!fs.existsSync(dest)) {
+                    throw Error(`cannot find: ${dest}`);
+                }
                 core.info(`untar ${dest}`);
                 await tar.x(
                     {

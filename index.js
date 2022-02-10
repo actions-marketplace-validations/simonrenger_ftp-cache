@@ -81,6 +81,7 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
     } catch (e) {
         core.error(`stack: ${e.stack}`);
         core.error(`error: ${e.message}`);
+        core.setFailed(`error: ${e.message}`);
         await sftp.end();
     }
 
@@ -142,7 +143,7 @@ async function ftp_cache(host, user, password, secure, archive, archive_name, so
         }
     }
     catch (err) {
-        console.log(err)
+        core.setFailed(`error: ${err}`);
     }
     client.close()
 }

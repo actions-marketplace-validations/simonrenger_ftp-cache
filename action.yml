@@ -1,6 +1,4 @@
 name: 'FTP Cache'
-icon: arrow-up-circle
-color: orange
 description: 'FTP Cache'
 inputs:
   mode:

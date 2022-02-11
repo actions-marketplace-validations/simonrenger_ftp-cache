@@ -6,10 +6,10 @@ const path = require('path');
 const fs = require('fs');
 const SFTPClient = require('ssh2-sftp-client');
 
-async function sftp_cache(host, user, password, secure, archive, archive_name, source, destination, timeout, upload) {
+async function sftp_cache(host, user, password, secure, archive, archive_name, source, destination, timeout, mode) {
 
-    const is_upload = upload == "Upload" || upload == "upload";
-    const is_download = upload == "Download" || upload == "Download";
+    const is_upload = mode == "Upload" || mode == "upload";
+    const is_download = mode == "Download" || mode == "Download";
 
     const config = {
         host: host,
@@ -107,11 +107,11 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
 }
 
 
-async function ftp_cache(host, user, password, secure, archive, archive_name, source, destination, timeout, upload) {
+async function ftp_cache(host, user, password, secure, archive, archive_name, source, destination, timeout, mode) {
     const client = new ftp.Client(timeout)
     client.ftp.verbose = true;
-    const is_upload = upload == "Upload" || upload == "upload";
-    const is_download = upload == "Download" || upload == "Download";
+    const is_upload = mode == "Upload" || mode == "upload";
+    const is_download = mode == "Download" || mode == "Download";
     try {
 
         client.trackProgress(info => {
@@ -183,14 +183,14 @@ async function ftp_cache(host, user, password, secure, archive, archive_name, so
         const destination = core.getInput('destination');
         const secure = core.getInput('secure') === "true";
         const timeout = parseInt(core.getInput('timeout'));
-        const upload = core.getInput('upload');
+        const type = core.getInput('type');
         const archive = core.getInput('archive') === "true";
         const archive_name = core.getInput('archive-name');
         const mode = core.getInput('mode');
-        if (mode == "FTP") {
-            await ftp_cache(host, user, password, secure, archive, archive_name, source, destination, timeout, upload);
+        if (type == "FTP") {
+            await ftp_cache(host, user, password, secure, archive, archive_name, source, destination, timeout, mode);
         } else {
-            await sftp_cache(host, user, password, secure, archive, archive_name, source, destination, timeout, upload);
+            await sftp_cache(host, user, password, secure, archive, archive_name, source, destination, timeout, mode);
         }
     } catch (error) {
         core.setFailed(error.message);

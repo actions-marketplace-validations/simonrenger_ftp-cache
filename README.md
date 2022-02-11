@@ -9,17 +9,17 @@ Allows you to treat a FTP Server as caching server.
 ## Inputs
 
 ```yml
-  mode:
+  type:
     description: 'FTP or SFTP'
     required: true
     default: "FTP"
   host:
     description: 'Host'
     required: true
-  upload:
-    description: 'Upload or Download'
+  mode:
+    description: 'Upload,Download,Remove'
     default: true
-    required: true
+    required: "Upload"
   user:
     description: 'User'
     required: true
@@ -31,9 +31,8 @@ Allows you to treat a FTP Server as caching server.
     required: true
   destination:
     description: 'Destination Folder'
-    required: true
   secure:
-    description: 'Destination Folder'
+    description: 'Is Connection Secure? (Only relevant for FTP)'
     required: false
     default: true
   timeout:

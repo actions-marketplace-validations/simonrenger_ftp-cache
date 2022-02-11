@@ -7,6 +7,10 @@ const fs = require('fs');
 const SFTPClient = require('ssh2-sftp-client');
 
 async function sftp_cache(host, user, password, secure, archive, archive_name, source, destination, timeout, upload) {
+
+    const is_upload = upload == "Upload" || upload == "upload";
+    const is_download = upload == "Download" || upload == "Download";
+
     const config = {
         host: host,
         username: user,
@@ -28,7 +32,7 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
             let tar_name = `${archive_name}.tgz`;
             let dest = path.posix.join(destination, tar_name);
             let src = path.posix.join(source, tar_name);
-            if (upload) {
+            if (is_upload) {
                 const src_path = source.split(path.sep).join(path.posix.sep);
                 if (!fs.existsSync(src_path)) {
                     throw Error(`cannot find: ${src_path}`);
@@ -60,7 +64,7 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
                 });
                 await sftp.end();
                 fs.rmSync(tar_name);
-            } else {
+            } else if (is_download) {
                 core.info(`download: ${dest} <-- ${src}`);
                 fs.mkdirSync(destination, { recursive: true });
                 await sftp.fastGet(src, dest);
@@ -75,14 +79,20 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
                     }
                 )
                 fs.rmSync(dest);
+            } else {
+                core.info(`remove dir: ${source}`);
+                await sftp.delete(src);
             }
         } else {
-            if (upload) {
+            if (is_upload) {
                 core.info(`upload: ${source} --> ${destination}`);
                 await sftp.uploadDir(source, destination);
-            } else {
+            } else if (is_download) {
                 core.info(`download: ${destination} <-- ${source}`);
                 await sftp.downloadDir(source, destination);
+            } else {
+                core.info(`remove: ${source}`);
+                await sftp.removeDir(source)
             }
             await sftp.end();
         }
@@ -100,6 +110,8 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
 async function ftp_cache(host, user, password, secure, archive, archive_name, source, destination, timeout, upload) {
     const client = new ftp.Client(timeout)
     client.ftp.verbose = true;
+    const is_upload = upload == "Upload" || upload == "upload";
+    const is_download = upload == "Download" || upload == "Download";
     try {
 
         client.trackProgress(info => {
@@ -123,7 +135,7 @@ async function ftp_cache(host, user, password, secure, archive, archive_name, so
             let tar_name = `${archive_name}.tgz`;
             let dest = path.posix.join(destination, tar_name);
             let src = path.posix.join(source, tar_name);
-            if (upload) {
+            if (is_upload) {
                 await tar.c(
                     {
                         gzip: true,
@@ -133,7 +145,7 @@ async function ftp_cache(host, user, password, secure, archive, archive_name, so
                 );
                 await client.uploadFrom(tar_name, dest);
                 fs.rmSync(tar_name);
-            } else {
+            } else if (is_download) {
                 await client.downloadTo(dest, src);
                 await tar.x(
                     {
@@ -141,13 +153,17 @@ async function ftp_cache(host, user, password, secure, archive, archive_name, so
                     }
                 )
                 fs.rmSync(dest);
+            } else {
+                await client.remove(src);
             }
         } else {
-            if (upload) {
+            if (is_upload) {
                 await client.removeDir(destination);
                 await client.uploadFromDir(source, destination);
-            } else {
+            } else if (is_download) {
                 await client.downloadToDir(destination, source);
+            } else {
+                await client.removeDir(src);
             }
         }
     }
@@ -167,7 +183,7 @@ async function ftp_cache(host, user, password, secure, archive, archive_name, so
         const destination = core.getInput('destination');
         const secure = core.getInput('secure') === "true";
         const timeout = parseInt(core.getInput('timeout'));
-        const upload = core.getInput('upload') === "true";
+        const upload = core.getInput('upload');
         const archive = core.getInput('archive') === "true";
         const archive_name = core.getInput('archive-name');
         const mode = core.getInput('mode');

@@ -9,9 +9,9 @@ inputs:
     description: 'Host'
     required: true
   upload:
-    description: 'Upload or Download'
+    description: 'Upload,Download,Remove'
     default: true
-    required: true
+    required: "Upload"
   user:
     description: 'User'
     required: true
@@ -23,9 +23,8 @@ inputs:
     required: true
   destination:
     description: 'Destination Folder'
-    required: true
   secure:
-    description: 'Destination Folder'
+    description: 'Is Connection Secure? (Only relevant for FTP)'
     required: false
     default: true
   timeout:

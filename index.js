@@ -82,6 +82,7 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
             } else {
                 core.info(`remove dir: ${source}`);
                 await sftp.delete(src);
+                await sftp.end();
             }
         } else {
             if (is_upload) {

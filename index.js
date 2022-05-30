@@ -80,8 +80,12 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
                 )
                 fs.rmSync(dest);
             } else {
-                core.info(`remove dir: ${source}`);
-                await sftp.delete(src);
+                core.info(`remove dir: ${src}`);
+                if (fs.existsSync(src)) {
+                    await sftp.delete(src);
+                } else {
+                    core.warning(`${src} does not exist, nothing todo.`);
+                }
                 await sftp.end();
             }
         } else {
@@ -93,13 +97,16 @@ async function sftp_cache(host, user, password, secure, archive, archive_name, s
                 await sftp.downloadDir(source, destination);
             } else {
                 core.info(`remove: ${source}`);
-                await sftp.removeDir(source)
+                if (fs.existsSync(source)) {
+                    await sftp.removeDir(source)
+                } else {
+                    core.warning(`${source} does not exist, nothing todo.`);
+                }
             }
             await sftp.end();
         }
     } catch (e) {
         core.error(`error: ${e.message}`);
-        core.error(`path: ${e.path}`);
         core.error(`stack: ${e.stack}`);
         core.setFailed(`error: ${e.message}`);
         await sftp.end();
